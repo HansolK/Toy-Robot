@@ -70,6 +70,22 @@ const isCoordinateOverTheBoard = number => {
   return false;
 };
 
+const changeDirection = (currentDirection, newDirection) => {
+  const currentPosition = directions.indexOf(currentDirection);
+  if (newDirection === "LEFT") {
+    if (currentPosition - 1 < 0) {
+      return "WEST";
+    }
+    return directions[currentPosition - 1];
+  }
+  if (newDirection === "RIGHT") {
+    if (currentPosition + 1 >= directions.length) {
+      return "NORTH";
+    }
+    return directions[currentPosition + 1];
+  }
+};
+
 const moveHandlers = {
   NORTH: location => ({ x: location.x, y: location.y + 1 }),
   SOUTH: location => ({ x: location.x, y: location.y - 1 }),
@@ -93,42 +109,48 @@ const question = async () => {
   location.y = Number(input[1]);
   location.direction = input[2].toUpperCase();
 
-  let response2 = await prompts(nextQuestion);
+  let nextResponse = await prompts(nextQuestion);
+  while (nextResponse.movement.toUpperCase() !== "REPORT") {
+    if (nextResponse.movement.toUpperCase() === "MOVE") {
+      const { x: newX, y: newY } = moveHandlers[location.direction](location);
+      location.x = newX;
+      location.y = newY;
+    }
 
-  if (response2.movement.toUpperCase() === "MOVE") {
-    const { x: newX, y: newY } = moveHandlers[location.direction](location);
-    location.x = newX;
-    location.y = newY;
-  }
+    const isXOverboard = isCoordinateOverTheBoard(location.x);
+    if (typeof isXOverboard === "number") {
+      location.x = isXOverboard;
+    }
+    const isYOverboard = isCoordinateOverTheBoard(location.y);
+    if (typeof isYOverboard === "number") {
+      location.y = isYOverboard;
+    }
 
-  const isXOverboard = isCoordinateOverTheBoard(location.x);
-  if (typeof isXOverboard === "number") {
-    location.x = isXOverboard;
+    if (
+      nextResponse.movement.toUpperCase() === "LEFT" ||
+      nextResponse.movement.toUpperCase() === "RIGHT"
+    ) {
+      location.direction = changeDirection(
+        location.direction,
+        nextResponse.movement.toUpperCase()
+      );
+    }
+    nextResponse = await prompts(nextQuestion);
   }
-  const isYOverboard = isCoordinateOverTheBoard(location.y);
-  if (typeof isYOverboard === "number") {
-    location.y = isYOverboard;
-  }
-
-  if (
-    response2.movement.toUpperCase() === "LEFT" ||
-    response2.movement.toUpperCase() === "RIGHT"
-  ) {
-    location.direction = changeDirection(
-      location.direction,
-      response2.movement.toUpperCase()
-    );
-  }
-
-  console.log(location);
-  return location;
+  return `${location.x},${location.y},${location.direction}`;
 };
 
-question();
+async function run() {
+  const result = await question();
+  console.log(result);
+}
+
+run();
 
 module.exports = {
   question,
   checkMovement,
   validatePlace,
-  isCoordinateOverTheBoard
+  isCoordinateOverTheBoard,
+  changeDirection
 };
