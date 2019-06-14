@@ -3,6 +3,18 @@ const { isValidNumber } = require("./number");
 
 const directions = ["NORTH", "EAST", "SOUTH", "WEST"];
 
+const checkMovement = value => {
+  if (
+    value === "MOVE" ||
+    value === "LEFT" ||
+    value === "RIGHT" ||
+    value === "REPORT"
+  ) {
+    return true;
+  }
+  return "Entre `MOVE`, `LEFT`, `RIGHT` or `REPORT`";
+};
+
 const validatePlace = value => {
   const inputs = value.split(" ");
 
@@ -36,6 +48,15 @@ const validatePlace = value => {
   }
 };
 
+const nextQuestion = [
+  {
+    type: "text",
+    name: "movement",
+    message: "next movement? if you want to finish, you can entre REPORT",
+    validate: value => checkMovement(value.toUpperCase())
+  }
+];
+
 const question = async () => {
   let location = {};
 
@@ -56,6 +77,9 @@ const question = async () => {
       return result;
     }
   });
+
+  let response2 = await prompts(nextQuestion);
+  console.log(" ========= ", location);
 
   console.log(response);
 };
