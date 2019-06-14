@@ -64,7 +64,7 @@ const isCoordinateOverTheBoard = number => {
   if (number < 0) {
     return 0;
   }
-  if (number > gridSize) {
+  if (number >= gridSize) {
     return gridSize - 1;
   }
   return false;
