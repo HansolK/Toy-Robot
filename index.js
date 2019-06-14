@@ -3,7 +3,6 @@ const { isValidNumber } = require("./number");
 
 const directions = ["NORTH", "EAST", "SOUTH", "WEST"];
 const gridSize = 5;
-
 const checkMovement = value => {
   if (
     value === "MOVE" ||
@@ -93,6 +92,16 @@ const question = async () => {
     }
     if (location.direction === "WEST") {
       location.x = location.x - 1;
+    }
+
+    if (
+      response2.movement.toUpperCase() === "LEFT" ||
+      response2.movement.toUpperCase() === "RIGHT"
+    ) {
+      location.direction = changeDirection(
+        location.direction,
+        response2.movement.toUpperCase()
+      );
     }
   }
   console.log(location);
