@@ -3,6 +3,7 @@ const { isValidNumber } = require("./number");
 
 const directions = ["NORTH", "EAST", "SOUTH", "WEST"];
 const gridSize = 5;
+
 const checkMovement = value => {
   if (
     value === "MOVE" ||
@@ -12,7 +13,7 @@ const checkMovement = value => {
   ) {
     return true;
   }
-  return "Entre `MOVE`, `LEFT`, `RIGHT` or `REPORT`";
+  return "Enter `MOVE`, `LEFT`, `RIGHT` or `REPORT`";
 };
 
 const validatePlace = value => {
@@ -46,6 +47,8 @@ const validatePlace = value => {
   if (directions.indexOf(direction.toUpperCase()) < 0) {
     return "The direction is invalid";
   }
+
+  return true;
 };
 
 const nextQuestion = [
@@ -57,54 +60,75 @@ const nextQuestion = [
   }
 ];
 
+const isCoordinateOverTheBoard = number => {
+  if (number < 0) {
+    return 0;
+  }
+  if (number > gridSize) {
+    return gridSize - 1;
+  }
+  return false;
+};
+
+const moveHandlers = {
+  NORTH: location => ({ x: location.x, y: location.y + 1 }),
+  SOUTH: location => ({ x: location.x, y: location.y - 1 }),
+  EAST: location => ({ x: location.x + 1, y: location.y }),
+  WEST: location => ({ x: location.x - 1, y: location.y })
+};
+
 const question = async () => {
   let location = {};
 
-  const response = await prompts({
+  const { value } = await prompts({
     type: "text",
     name: "value",
     message: "Where do you want to start from? ",
     initial: "PLACE 0,0,North",
-    validate: value => {
-      const result = validatePlace(value);
-      if (typeof result !== "string") {
-        const input = value.split(" ")[1].split(",");
-        location.x = Number(input[0]);
-        location.y = Number(input[1]);
-        location.direction = input[2].toUpperCase();
-        return true;
-      }
-      return result;
-    }
+    validate: validatePlace
   });
+
+  const input = value.split(" ")[1].split(",");
+  location.x = Number(input[0]);
+  location.y = Number(input[1]);
+  location.direction = input[2].toUpperCase();
 
   let response2 = await prompts(nextQuestion);
 
   if (response2.movement.toUpperCase() === "MOVE") {
-    if (location.direction === "NORTH") {
-      location.y = location.y + 1;
-    }
-    if (location.direction === "EAST") {
-      location.x = location.x + 1;
-    }
-    if (location.direction === "SOUTH") {
-      location.y = location.y - 1;
-    }
-    if (location.direction === "WEST") {
-      location.x = location.x - 1;
-    }
-
-    if (
-      response2.movement.toUpperCase() === "LEFT" ||
-      response2.movement.toUpperCase() === "RIGHT"
-    ) {
-      location.direction = changeDirection(
-        location.direction,
-        response2.movement.toUpperCase()
-      );
-    }
+    const { x: newX, y: newY } = moveHandlers[location.direction](location);
+    location.x = newX;
+    location.y = newY;
   }
+
+  const isXOverboard = isCoordinateOverTheBoard(location.x);
+  if (typeof isXOverboard === "number") {
+    location.x = isXOverboard;
+  }
+  const isYOverboard = isCoordinateOverTheBoard(location.y);
+  if (typeof isYOverboard === "number") {
+    location.y = isYOverboard;
+  }
+
+  if (
+    response2.movement.toUpperCase() === "LEFT" ||
+    response2.movement.toUpperCase() === "RIGHT"
+  ) {
+    location.direction = changeDirection(
+      location.direction,
+      response2.movement.toUpperCase()
+    );
+  }
+
   console.log(location);
+  return location;
 };
 
 question();
+
+module.exports = {
+  question,
+  checkMovement,
+  validatePlace,
+  isCoordinateOverTheBoard
+};
