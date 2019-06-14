@@ -55,7 +55,7 @@ const nextQuestion = [
   {
     type: "text",
     name: "movement",
-    message: "next movement? if you want to finish, you can entre REPORT",
+    message: "next movement? if you want to finish, you can enter REPORT",
     validate: value => checkMovement(value.toUpperCase())
   }
 ];
@@ -140,10 +140,10 @@ const question = async () => {
   return `${location.x},${location.y},${location.direction}`;
 };
 
-async function run() {
+const run = async () => {
   const result = await question();
   console.log(result);
-}
+};
 
 run();
 
