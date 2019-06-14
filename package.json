@@ -9,6 +9,7 @@
   "author": "Hansol Kim",
   "license": "ISC",
   "dependencies": {
+    "jest": "^24.8.0",
     "prompts": "^2.1.0"
   },
   "devDependencies": {
