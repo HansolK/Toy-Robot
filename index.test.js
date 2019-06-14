@@ -3,8 +3,11 @@ const {
   question,
   checkMovement,
   validatePlace,
-  isCoordinateOverTheBoard
+  isCoordinateOverTheBoard,
+  changeDirection
 } = require("./index");
+
+jest.mock("prompts");
 
 const gridSize = 5;
 
@@ -61,7 +64,7 @@ describe("validatePlace", () => {
   });
 });
 
-describe.only("isCoordinateOverTheBoard", () => {
+describe("isCoordinateOverTheBoard", () => {
   it("returns zero when input is less than zero", () => {
     expect(isCoordinateOverTheBoard(-1)).toEqual(0);
   });
@@ -76,20 +79,45 @@ describe.only("isCoordinateOverTheBoard", () => {
   });
 });
 
-jest.mock("prompts");
+describe("changeDirection", () => {
+  it("returns WEST when turning left from NORTH", () => {
+    expect(changeDirection("NORTH", "LEFT")).toEqual("WEST");
+  });
 
-describe("exampleFunction", () => {
+  it("returns NORTH when turning right from WEST", () => {
+    expect(changeDirection("WEST", "RIGHT")).toEqual("NORTH");
+  });
+
+  it("returns SOUTH when turning right from EAST", () => {
+    expect(changeDirection("EAST", "RIGHT")).toEqual("SOUTH");
+  });
+});
+
+describe("right output", () => {
   beforeEach(() => {
     prompts.mockReset();
   });
 
-  it("getting the right result", async () => {
+  it("moves to the right coordinates", async () => {
     prompts
       .mockReturnValueOnce({ value: "PLACE 0,0,NORTH" })
       .mockReturnValueOnce({ movement: "MOVE" })
-      .mockReturnValueOnce("REPORT");
+      .mockReturnValueOnce({ movement: "REPORT" });
     const result = await question();
 
-    expect(result).toEqual({ direction: "NORTH", x: 0, y: 1 });
+    expect(result).toEqual("0,1,NORTH");
+  });
+
+  it("moves to the right coordinates", async () => {
+    prompts
+      .mockReturnValueOnce({ value: "PLACE 1,2,EAST" })
+      .mockReturnValueOnce({ movement: "MOVE" })
+      .mockReturnValueOnce({ movement: "MOVE" })
+      .mockReturnValueOnce({ movement: "LEFT" })
+      .mockReturnValueOnce({ movement: "MOVE" })
+      .mockReturnValueOnce({ movement: "REPORT" });
+    const result = await question();
+
+    expect(result).toEqual("3,3,NORTH");
   });
 });
