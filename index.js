@@ -2,6 +2,7 @@ const prompts = require("prompts");
 const { isValidNumber } = require("./number");
 
 const directions = ["NORTH", "EAST", "SOUTH", "WEST"];
+const gridSize = 5;
 
 const checkMovement = value => {
   if (
@@ -79,9 +80,22 @@ const question = async () => {
   });
 
   let response2 = await prompts(nextQuestion);
-  console.log(" ========= ", location);
 
-  console.log(response);
+  if (response2.movement.toUpperCase() === "MOVE") {
+    if (location.direction === "NORTH") {
+      location.y = location.y + 1;
+    }
+    if (location.direction === "EAST") {
+      location.x = location.x + 1;
+    }
+    if (location.direction === "SOUTH") {
+      location.y = location.y - 1;
+    }
+    if (location.direction === "WEST") {
+      location.x = location.x - 1;
+    }
+  }
+  console.log(location);
 };
 
 question();
